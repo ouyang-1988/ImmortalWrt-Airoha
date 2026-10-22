@@ -1,45 +1,45 @@
-name: ImmortalWrt-Airoha
+名称：ImmortalWrt-Airoha: ImmortalWrt-Airoha
 
 # 让 Actions 列表直接显示本次选了什么，省得点进去翻日志里的 env 块。
 # 必须写成一行：折叠标量会把缩进更深的续行当字面量，在 ${{ }} 中间插进换行。
 run-name: "${{ inputs.device == 'all' && '全部机型' || inputs.device == 'xg-040g-mf' && 'XG-040G-MF' || inputs.device == 'xg-040g-tf' && 'XG-040G-TF' || inputs.device == 'zn504xg-d' && 'ZN504XG-D' || inputs.device == 'hg5382a' && 'HG5382A' || 'XG-040G-MD' }} · ${{ inputs.repo_branch || 'master-airoha' }} · ${{ inputs.dram_size == 'auto' && '自适应内存' || inputs.dram_size }} · ${{ inputs.device_variant }}${{ inputs.extra_packages != '' && ' · 有附加包' || '' }}${{ inputs.pkg_versions != '' && ' · 指定版本' || '' }}${{ inputs.release == 'prerelease' && ' · pre-release' || inputs.release == 'artifact' && ' · 不发布' || '' }}"
 
-on:
-  workflow_dispatch:
-    inputs:
-      repo_branch:
-        description: '源码分支（Loong1996/immortalwrt）。留空即 master-airoha；填别的分支只作测试，默认只传 Artifact、不更新选包索引'
-        required: false
-        default: 'master-airoha'
-        type: string
-      device:
-        description: '机型（默认 all：每个机型各起一个 job 并行编，stock 变体只编 MD 与 MF）'
-        required: true
-        default: 'all'
-        type: choice
-        options:
-          - all
-          - xg-040g-md
-          - xg-040g-mf
-          - xg-040g-tf
-          - zn504xg-d
-          - hg5382a
-      device_variant:
-        description: '设备变体（ubi 推荐：作者魔改 U-Boot，带网页救砖；stock 保留原厂引导）'
-        required: true
-        default: 'ubi'
-        type: choice
-        options:
-          - ubi
-          - stock
-      dram_size:
-        description: '内存上限（默认自适应，U-Boot 探测实际颗粒；选具体档位只会把系统往小里限，用于对照实验）'
-        required: true
-        default: 'auto'
-        type: choice
-        options:
-          - auto
-          - 512M
+在：:
+  工作流_调度::
+    输入：:
+      仓库分支::
+        描述：源码分支（Loong1996/immortalwrt）。留空即 master-airoha；填别的分支只作测试，默认只传 Artifact、不更新选包索引: '源码分支（Loong1996/immortalwrt）。留空即 master-airoha；填别的分支只作测试，默认只传 Artifact、不更新选包索引'
+        必填：否: false
+        默认值：'master-airoha': 'master-airoha'
+        类型：字符串: string
+      设备：:
+        描述：'机型（默认 all：每个机型各起一个 job 并行编，stock 变体只编 MD 与 MF）': '机型（默认 all：每个机型各起一个 job 并行编，stock 变体只编 MD 与 MF）'
+        必填：是: true
+        默认值：'all': 'all'
+        类型：选择: choice
+        选项：:
+          - 全部all
+          - xg-040g-mdxg-040g-md
+          - xg-040g-mfxg-040g-mf
+          - xg-040g-tfxg-040g-tf
+          - zn504xg-dzn504xg-d
+          - hg5382ahg5382a
+      设备变体::
+        描述：'设备变体（ubi 推荐：作者魔改 U-Boot，带网页救砖；stock 保留原厂引导）': '设备变体（ubi 推荐：作者魔改 U-Boot，带网页救砖；stock 保留原厂引导）'
+        必填：是: true
+        默认值：'ubi': 'ubi'
+        类型：选择: choice
+        选项：:
+          - ubiubi
+          - 股票stock
+      dram_size::
+        描述：'内存上限（默认自适应，U-Boot 探测实际颗粒；选具体档位只会把系统往小里限，用于对照实验）': '内存上限（默认自适应，U-Boot 探测实际颗粒；选具体档位只会把系统往小里限，用于对照实验）'
+        必填：是: true
+        默认值：'auto': 'auto'
+        类型：选择: choice
+        选项：:
+          - 自动auto
+          - 512M512M
           - 1G
           - 2G
       extra_packages:
@@ -405,6 +405,10 @@ jobs:
         [ -f feeds.conf ] || cp feeds.conf.default feeds.conf
         grep -q "^src-link loong " feeds.conf || \
           echo "src-link loong $GITHUB_WORKSPACE/packages" >> feeds.conf
+        git clone --depth=1 --branch v2.6.4 https://github.com/EasyTier/luci-app-easytier "$RUNNER_TEMP/easytier-feed"
+        grep -q "^src-link easytier " feeds.conf || \
+          echo "src-link easytier $RUNNER_TEMP/easytier-feed" >> feeds.conf
+
         ./scripts/feeds update -a
         ./scripts/feeds install -a
 
